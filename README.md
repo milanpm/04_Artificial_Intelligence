@@ -174,10 +174,35 @@ The most important lesson from Day 1 is:
 
 ---
 
+## Day 2 - Data, Features, Labels, and Training Data
+
+Day 2 focused on understanding how training data is structured and how its quality affects the rules learned by a Machine Learning model.
+
+### Dataset Structure
+
+The training dataset contains two features:
+
+- `study_hours`: Number of hours spent studying
+- `attendance_rate`: Student attendance percentage
+
+The target label represents the expected result:
+
+- `FAIL`: The student does not satisfy the required conditions
+- `PASS`: The student satisfies both conditions
+
+Each training sample follows this structure:
+
+```text
+[study_hours, attendance_rate] → label
+```
+
+---
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
-- [ ] Day 2 - Data, Features, Labels, and Training Data
+- [x] Day 2 - Data, Features, Labels, and Training Data
+- [ ] Day 3 - Training, Testing, and Model Evaluation
 
 ---
 
