@@ -198,11 +198,30 @@ Each training sample follows this structure:
 
 ---
 
+## Day 3 - Training, Testing, and Model Evaluation
+
+Day 3 focused on splitting a dataset into training and test sets, training a decision tree with only the training data, and evaluating its predictions on unseen test data.
+
+### Dataset Split
+
+The dataset contains 20 samples and two features:
+
+- `study_hours`: Number of hours spent studying
+- `attendance_rate`: Student attendance percentage
+
+The dataset was divided using `train_test_split()`:
+
+```text
+Total samples: 20
+Training samples: 15
+Test samples: 5
+```
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
 - [x] Day 2 - Data, Features, Labels, and Training Data
-- [ ] Day 3 - Training, Testing, and Model Evaluation
+- [x] Day 3 - Training, Testing, and Model Evaluation
 
 ---
 
