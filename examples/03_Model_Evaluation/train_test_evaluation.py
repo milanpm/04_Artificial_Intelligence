@@ -16,9 +16,6 @@ Description:
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, export_text
-from sklearn.metrics import accuracy_score
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier, export_text
 
 
 # Each sample follows this structure:

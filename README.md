@@ -217,11 +217,93 @@ Training samples: 15
 Test samples: 5
 ```
 
+The model learned only from `X_train` and `y_train`:
+
+```python
+model.fit(X_train, y_train)
+```
+
+---
+
+## Day 4 - Classification Evaluation Metrics
+
+Day 4 focused on evaluating binary classification results using a confusion matrix and four important evaluation metrics: accuracy, precision, recall, and F1-score.
+
+### Positive and Negative Classes
+
+For this example:
+
+- `PASS` is treated as the Positive class.
+- `FAIL` is treated as the Negative class.
+
+### Confusion Matrix
+
+The confusion matrix compares the actual labels with the predicted labels:
+
+```text
+                 Predicted
+                 FAIL  PASS
+Actual FAIL         3     1
+Actual PASS         1     3
+```
+
+The four classification results were:
+
+```text
+TP - True Positive:  3
+TN - True Negative:  3
+FP - False Positive: 1
+FN - False Negative: 1
+```
+
+- `TP`: The model correctly predicted PASS.
+- `TN`: The model correctly predicted FAIL.
+- `FP`: The model incorrectly predicted PASS.
+- `FN`: The model incorrectly predicted FAIL.
+
+### Evaluation Metrics
+
+The classification evaluation results were:
+
+```text
+Accuracy:  75.0%
+Precision: 75.0%
+Recall:    75.0%
+F1-score:  75.0%
+```
+
+- **Accuracy** measures the percentage of all correct predictions.
+- **Precision** measures how reliable the Positive predictions are.
+- **Recall** measures how many actual Positive samples were found.
+- **F1-score** measures the balance between precision and recall.
+
+### Metric Formulas
+
+```text
+Accuracy  = (TP + TN) / (TP + TN + FP + FN)
+Precision = TP / (TP + FP)
+Recall    = TP / (TP + FN)
+F1-score  = 2 × (Precision × Recall) / (Precision + Recall)
+```
+
+### Classification Report
+
+Scikit-learn's `classification_report()` displays precision, recall, F1-score, and support for each class.
+
+The `support` value represents the number of actual samples belonging to each class.
+
+### Source Code
+
+- [`classification_metrics.py`](examples/04_Classification_Metrics/classification_metrics.py)
+
+---
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
 - [x] Day 2 - Data, Features, Labels, and Training Data
 - [x] Day 3 - Training, Testing, and Model Evaluation
+- [x] Day 4 - Classification Evaluation Metrics
 
 ---
 
