@@ -298,12 +298,225 @@ The `support` value represents the number of actual samples belonging to each cl
 
 ---
 
+## Day 5 - Data Preprocessing and Feature Scaling
+
+Day 5 focused on preparing raw data for machine learning by handling missing values, scaling numerical features, preventing data leakage, and building a preprocessing pipeline.
+
+### Why Data Preprocessing Matters
+
+Real-world datasets may contain:
+
+- Missing values
+- Features with different numerical ranges
+- Incorrect or inconsistent values
+- Categorical values
+- Outliers
+
+Data preprocessing transforms raw data into a form that machine learning models can use effectively.
+
+### Handling Missing Values
+
+Missing numerical values were represented using NumPy's `NaN` value:
+
+```python
+np.nan
+```
+
+Missing values in each column were identified using:
+
+```python
+df.isnull().sum()
+```
+
+`SimpleImputer` replaced missing numerical values with the median of each feature:
+
+```python
+imputer = SimpleImputer(strategy="median")
+X_imputed = imputer.fit_transform(X)
+```
+
+The learned median values were:
+
+```text
+study_hours:       4.00
+attendance:       80.00
+assignment_score: 70.00
+```
+
+Median imputation is useful because it is less affected by unusually large or small values than mean imputation.
+
+### StandardScaler
+
+`StandardScaler` transforms each feature so that the training data has a mean of approximately `0` and a standard deviation of approximately `1`.
+
+```text
+z = (x - mean) / standard deviation
+```
+
+The scaler was fitted only on the training data:
+
+```python
+standard_scaler = StandardScaler()
+
+X_train_standard = standard_scaler.fit_transform(X_train)
+X_test_standard = standard_scaler.transform(X_test)
+```
+
+The scaled training data had the following properties:
+
+```text
+Feature means:               0
+Feature standard deviations: 1
+```
+
+### MinMaxScaler
+
+`MinMaxScaler` normally transforms training values into the range from `0` to `1`.
+
+```text
+scaled value = (x - minimum) / (maximum - minimum)
+```
+
+It was applied as follows:
+
+```python
+minmax_scaler = MinMaxScaler()
+
+X_train_minmax = minmax_scaler.fit_transform(X_train)
+X_test_minmax = minmax_scaler.transform(X_test)
+```
+
+A test value may be greater than `1.0` when it exceeds the maximum learned from the training data.
+
+For example:
+
+```text
+Training range for study_hours: 1.0 to 8.0
+Test value:                     9.0
+Scaled test value:              1.143
+```
+
+### Preventing Data Leakage
+
+The dataset must be split before fitting preprocessing tools:
+
+```python
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.25,
+    random_state=42,
+    stratify=y,
+)
+```
+
+The correct preprocessing process is:
+
+```python
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+```
+
+Calling `fit_transform()` on the test data would calculate new preprocessing parameters using information that should remain unseen.
+
+> Fit preprocessing tools only on the training data and use the learned parameters to transform the test data.
+
+### Preprocessing Pipeline
+
+A scikit-learn `Pipeline` combined missing-value handling, feature scaling, and model training:
+
+```python
+pipeline = Pipeline(
+    steps=[
+        ("imputer", SimpleImputer(strategy="median")),
+        ("scaler", StandardScaler()),
+        ("model", LogisticRegression()),
+    ]
+)
+```
+
+Training the pipeline performs:
+
+```text
+Training data
+→ Median imputation
+→ Standard scaling
+→ Logistic regression training
+```
+
+Making predictions performs:
+
+```text
+Test data
+→ Apply learned medians
+→ Apply learned scaling parameters
+→ Predict the class
+```
+
+The pipeline was trained and evaluated using:
+
+```python
+pipeline.fit(X_train, y_train)
+predictions = pipeline.predict(X_test)
+```
+
+### Pipeline Results
+
+The preprocessing steps learned the following values only from the training data:
+
+```text
+Median values:
+study_hours:       5.25
+attendance:       79.00
+assignment_score: 73.00
+
+Means after imputation:
+study_hours:       5.50
+attendance:       77.93
+assignment_score: 73.71
+```
+
+All six test samples were classified correctly:
+
+```text
+Accuracy: 1.00
+```
+
+This small artificial dataset demonstrates that the pipeline works correctly. It does not prove that the model will achieve perfect performance on real-world data.
+
+### Predicting a New Student
+
+The pipeline received a new student with a missing `study_hours` value:
+
+```text
+study_hours:       NaN
+attendance:        82.0
+assignment_score:  78.0
+```
+
+The missing value was replaced with the training median of `5.25`.
+
+```text
+Prediction:       Pass
+Pass probability: 0.717
+```
+
+### Source Code
+
+- [`missing_values.py`](examples/05_Data_Preprocessing/missing_values.py)
+- [`feature_scaling.py`](examples/05_Data_Preprocessing/feature_scaling.py)
+- [`preprocessing_pipeline.py`](examples/05_Data_Preprocessing/preprocessing_pipeline.py)
+
+---
+
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
 - [x] Day 2 - Data, Features, Labels, and Training Data
 - [x] Day 3 - Training, Testing, and Model Evaluation
 - [x] Day 4 - Classification Evaluation Metrics
+- [x] Day 5 - Data Preprocessing and Feature Scaling
 
 ---
 
