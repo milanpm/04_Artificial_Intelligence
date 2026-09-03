@@ -510,6 +510,50 @@ Pass probability: 0.717
 ---
 
 
+## Day 6 — Comparing Machine Learning Models
+
+### Learning Objectives
+
+- Compare Logistic Regression, Decision Tree, and K-Nearest Neighbors
+- Train and evaluate every model on the same data split
+- Compare Accuracy, Precision, Recall, F1-score, and Confusion Matrix
+- Understand why accuracy alone may be misleading
+- Distinguish models that require feature scaling from models that generally do not
+- Prevent data leakage by applying preprocessing inside a Pipeline
+
+### Example
+
+```bash
+python examples/06_Model_Comparison/model_comparison.py
+```
+
+### Model and Preprocessing Comparison
+
+| Model | Feature Scaling | Main Characteristic |
+| --- | --- | --- |
+| Logistic Regression | Recommended | Linear, probabilistic, interpretable baseline |
+| Decision Tree | Usually unnecessary | Nonlinear rule-based splits |
+| K-Nearest Neighbors | Usually required | Distance-based prediction |
+
+### Result
+
+| Model | Accuracy | Precision | Recall | F1-score |
+| --- | ---: | ---: | ---: | ---: |
+| Logistic Regression | 0.760 | 0.579 | 0.333 | 0.423 |
+| Decision Tree | 0.832 | 0.833 | 0.455 | 0.588 |
+| K-Nearest Neighbors | 0.888 | 0.952 | 0.606 | 0.741 |
+
+A majority-class baseline achieved 0.736 accuracy but 0.000 recall and 0.000 F1-score. This demonstrates why accuracy alone is not sufficient for imbalanced classification.
+
+### Key Lesson
+
+The best model is not necessarily the model with the highest accuracy. Model selection must consider the problem objective, error costs, preprocessing requirements, and multiple evaluation metrics.
+
+### Next Step
+
+**Day 7 — Cross-Validation and Reliable Model Evaluation**
+
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
@@ -517,6 +561,8 @@ Pass probability: 0.717
 - [x] Day 3 - Training, Testing, and Model Evaluation
 - [x] Day 4 - Classification Evaluation Metrics
 - [x] Day 5 - Data Preprocessing and Feature Scaling
+- [x] Day 6 - Comparing Machine Learning Models
+- [ ] Day 7 - Cross-Validation and Reliable Model Evaluation
 
 ---
 
