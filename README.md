@@ -25,6 +25,22 @@ The goal of this repository is to understand AI concepts through practical Pytho
 
 ---
 
+## AI Learning Blog
+
+The learning notes for each completed day are also published on the
+[Zero-Score Club](https://zsclub.blogspot.com/) blog.
+
+| Day | Topic | Blog Post |
+| --- | --- | --- |
+| 1 | From Rule-Based Programming to Machine Learning | [Read Day 1](https://zsclub.blogspot.com/2026/08/ai-learning-day-1-from-rule-based.html) |
+| 2 | Data, Features, Labels, and Training Data | [Read Day 2](https://zsclub.blogspot.com/2026/08/ai-learning-day-2-understanding-data.html) |
+| 3 | Training, Testing, and Model Evaluation | [Read Day 3](https://zsclub.blogspot.com/2026/08/ai-learning-day-3-training-testing-model-evaluation.html) |
+| 4 | Classification Evaluation Metrics | [Read Day 4](https://zsclub.blogspot.com/2026/08/ai-learning-day-4-understanding-classification-metrics.html) |
+| 5 | Data Preprocessing and Feature Scaling | [Read Day 5](https://zsclub.blogspot.com/2026/09/ai-learning-day-5-data-preprocessing-feature-scaling.html) |
+| 6 | Comparing Machine Learning Models | [Read Day 6](https://zsclub.blogspot.com/2026/09/ai-learning-day-6-comparing-machine-learning-models.html) |
+
+---
+
 ## Repository Structure
 
 ```text
