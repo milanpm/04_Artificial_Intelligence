@@ -569,6 +569,94 @@ The best model is not necessarily the model with the highest accuracy. Model sel
 
 **Day 7 — Cross-Validation and Reliable Model Evaluation**
 
+---
+
+## Day 7 — Cross-Validation and Reliable Model Evaluation
+
+### Learning Objectives
+
+- Understand the limitations of a single train/test split
+- Keep the final test set separate from model selection
+- Apply 5-fold Stratified K-Fold cross-validation
+- Preserve class proportions across validation folds
+- Evaluate models using Accuracy, Precision, Recall, and F1-score
+- Interpret the mean and standard deviation of validation scores
+- Select a model using mean cross-validation F1-score
+- Evaluate the selected model once on the final holdout test set
+
+### Example
+
+```bash
+python examples/07_Cross_Validation/cross_validation.py
+```
+
+### Evaluation Workflow
+
+1. Split the dataset into training and final test sets.
+2. Keep the final test set untouched during model comparison.
+3. Perform 5-fold Stratified Cross-Validation using only the training set.
+4. Compare the mean and standard deviation of multiple evaluation metrics.
+5. Select the model with the highest mean cross-validation F1-score.
+6. Retrain the selected model using all training data.
+7. Evaluate it once on the final holdout test set.
+
+### Why Stratified K-Fold?
+
+The dataset contains fewer positive samples than negative samples. Stratified K-Fold preserves approximately the same class distribution in every fold, making the evaluation more reliable for imbalanced classification.
+
+```text
+Training samples: 375
+Test samples: 125
+Positive ratio in training set: 26.40%
+Positive ratio in test set:     26.40%
+```
+
+### Cross-Validation Result
+
+| Model | Accuracy | Precision | Recall | F1-score |
+| --- | ---: | ---: | ---: | ---: |
+| Logistic Regression | 0.792 ± 0.032 | 0.705 ± 0.104 | 0.394 ± 0.067 | 0.499 ± 0.065 |
+| Decision Tree | 0.811 ± 0.031 | 0.750 ± 0.147 | 0.465 ± 0.086 | 0.562 ± 0.066 |
+| K-Nearest Neighbors | **0.843 ± 0.030** | **0.820 ± 0.072** | **0.514 ± 0.091** | **0.629 ± 0.087** |
+
+K-Nearest Neighbors achieved the highest mean F1-score and was selected as the final model.
+
+### Final Holdout Test Result
+
+| Metric | Score |
+| --- | ---: |
+| Accuracy | 0.888 |
+| Precision | 0.952 |
+| Recall | 0.606 |
+| F1-score | 0.741 |
+
+The holdout result is higher than the cross-validation average. This demonstrates why a single test result may provide an optimistic estimate of model performance.
+
+### Mean and Standard Deviation
+
+A cross-validation score such as:
+
+```text
+F1-score: 0.629 ± 0.087
+```
+
+means that the average F1-score across the five validation folds was `0.629`, with a standard deviation of `0.087`.
+
+A higher mean indicates better average performance, while a smaller standard deviation indicates more stable performance across different data subsets.
+
+### Key Lesson
+
+A single train/test split shows performance on only one particular data division. Cross-validation provides a more reliable estimate by evaluating the model repeatedly on different validation subsets.
+
+The final test set must remain untouched during model comparison. Repeatedly checking the test set while selecting or tuning a model can indirectly overfit the model-selection process to that test set.
+
+### Source Code
+
+- [`cross_validation.py`](examples/07_Cross_Validation/cross_validation.py)
+
+### Next Step
+
+**Day 8 — Hyperparameter Tuning with GridSearchCV**
 
 ## Progress
 
@@ -578,7 +666,8 @@ The best model is not necessarily the model with the highest accuracy. Model sel
 - [x] Day 4 - Classification Evaluation Metrics
 - [x] Day 5 - Data Preprocessing and Feature Scaling
 - [x] Day 6 - Comparing Machine Learning Models
-- [ ] Day 7 - Cross-Validation and Reliable Model Evaluation
+- [x] Day 7 - Cross-Validation and Reliable Model Evaluation
+- [ ] Day 8 - Hyperparameter Tuning with GridSearchCV
 
 ---
 
