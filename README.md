@@ -658,6 +658,127 @@ The final test set must remain untouched during model comparison. Repeatedly che
 
 **Day 8 — Hyperparameter Tuning with GridSearchCV**
 
+---
+
+## Day 8 — Hyperparameter Tuning with GridSearchCV
+
+### Learning Objectives
+
+- Understand the difference between model parameters and hyperparameters
+- Build a preprocessing and KNN classification Pipeline
+- Define a hyperparameter search space
+- Use GridSearchCV with Stratified K-Fold cross-validation
+- Select hyperparameters using mean cross-validation F1-score
+- Compare the highest-ranking parameter combinations
+- Identify possible overfitting from training and validation scores
+- Evaluate the tuned model once on the untouched final test set
+
+### Example
+
+```bash
+python examples/08_Hyperparameter_Tuning/grid_search_knn.py
+```
+
+### Baseline Model
+
+Day 7 used the following K-Nearest Neighbors configuration:
+
+```text
+n_neighbors=7
+weights=uniform
+p=2
+```
+
+The same model was retained as the baseline so that the effect of hyperparameter tuning could be measured fairly.
+
+### Baseline Cross-Validation Result
+
+| Metric | Mean Score |
+| --- | ---: |
+| Accuracy | 0.843 ± 0.030 |
+| Precision | 0.820 ± 0.072 |
+| Recall | 0.514 ± 0.091 |
+| F1-score | 0.629 ± 0.087 |
+
+### Hyperparameter Search Space
+
+| Hyperparameter | Candidate Values | Meaning |
+| --- | --- | --- |
+| `n_neighbors` | 3, 5, 7, 9, 11, 15 | Number of neighboring samples used for prediction |
+| `weights` | `uniform`, `distance` | Whether all neighbors vote equally or closer neighbors receive more weight |
+| `p` | 1, 2 | Manhattan distance (`p=1`) or Euclidean distance (`p=2`) |
+
+The grid contained 24 parameter combinations:
+
+```text
+6 neighbor values × 2 weight methods × 2 distance metrics
+= 24 combinations
+```
+
+Each combination was evaluated with 5-fold cross-validation:
+
+```text
+24 combinations × 5 folds = 120 model fits
+```
+
+The final test set was not used during the grid search.
+
+### Best Grid Search Result
+
+```text
+n_neighbors=3
+weights=uniform
+p=2
+Best mean CV F1-score: 0.690
+```
+
+The tuned model improved the mean cross-validation F1-score by approximately `0.062` compared with the baseline model.
+
+### Top Hyperparameter Combinations
+
+| Rank | Neighbors | Weights | p | Mean CV F1 | Standard Deviation | Mean Train F1 |
+| ---: | ---: | --- | ---: | ---: | ---: | ---: |
+| 1 | 3 | uniform | 2 | 0.690 | 0.049 | 0.808 |
+| 2 | 3 | distance | 2 | 0.687 | 0.056 | 1.000 |
+| 3 | 3 | uniform | 1 | 0.680 | 0.049 | 0.855 |
+| 3 | 3 | distance | 1 | 0.680 | 0.049 | 1.000 |
+| 5 | 15 | distance | 1 | 0.678 | 0.029 | 1.000 |
+
+The distance-weighted configurations achieved a training F1-score of `1.000`. This large difference between training and validation performance indicates possible overfitting.
+
+### Final Holdout Test Comparison
+
+| Model | Accuracy | Precision | Recall | F1-score |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline KNN | **0.888** | **0.952** | 0.606 | **0.741** |
+| Tuned KNN | 0.848 | 0.769 | 0.606 | 0.678 |
+
+The tuned model improved the mean cross-validation F1-score but achieved a lower F1-score on the final holdout test set.
+
+Both models produced the same recall of `0.606`, but the tuned model had lower precision. This means that it found the same proportion of positive samples while producing more false-positive predictions.
+
+### Why Not Select the Baseline Again?
+
+The final test set must not be used for model selection. Choosing the baseline model again only because it performed better on this test set would indirectly tune the decision to the test data.
+
+The correct conclusion is that GridSearchCV selected the tuned model using the training data, but its performance on one independent holdout set was lower than expected.
+
+Cross-validation estimates average performance across several validation subsets, while the holdout test measures performance on one specific subset. The two results can therefore differ, especially when the dataset is relatively small.
+
+### Key Lesson
+
+GridSearchCV provides a systematic method for testing multiple hyperparameter combinations. Each combination is evaluated under the same cross-validation procedure, making the comparison more reliable than manually testing settings on the final test set.
+
+However, hyperparameter tuning does not guarantee better performance on every independent test set. Training scores, validation scores, and final test scores must be interpreted together.
+
+### Source Code
+
+- [`grid_search_knn.py`](examples/08_Hyperparameter_Tuning/grid_search_knn.py)
+
+### Next Step
+
+**Day 9 — Feature Selection and Model Interpretation**
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
@@ -667,7 +788,8 @@ The final test set must remain untouched during model comparison. Repeatedly che
 - [x] Day 5 - Data Preprocessing and Feature Scaling
 - [x] Day 6 - Comparing Machine Learning Models
 - [x] Day 7 - Cross-Validation and Reliable Model Evaluation
-- [ ] Day 8 - Hyperparameter Tuning with GridSearchCV
+- [x] Day 8 - Hyperparameter Tuning with GridSearchCV
+- [ ] Day 9 - Feature Selection and Model Interpretation
 
 ---
 
