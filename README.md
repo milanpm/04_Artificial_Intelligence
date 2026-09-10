@@ -779,6 +779,173 @@ However, hyperparameter tuning does not guarantee better performance on every in
 
 **Day 9 — Feature Selection and Model Interpretation**
 
+## Day 9 — Feature Selection and Model Interpretation
+
+Day 9 explores how to identify useful input features and remove features that provide little predictive information.
+
+The example uses `SelectKBest` with the ANOVA F-test to score each feature individually. A pipeline and `GridSearchCV` are then used to determine the best number of features without leaking validation information into the training process.
+
+### Learning Objectives
+
+- Understand why unnecessary features can reduce model performance
+- Generate informative and noise features for comparison
+- Score classification features with `SelectKBest` and `f_classif`
+- Perform feature selection inside a machine learning pipeline
+- Determine the optimal feature count using cross-validation
+- Interpret feature scores and selected features
+- Evaluate the final model on an independent test set
+
+### Run the Example
+
+```bash
+python examples/09_Feature_Selection/feature_selection.py
+```
+
+### Dataset
+
+The synthetic classification dataset contains 500 samples and eight input features:
+
+```text
+5 informative features
+3 noise features
+```
+
+The data is divided using a stratified train-test split:
+
+| Dataset | Samples | Positive Ratio |
+| --- | ---: | ---: |
+| Training set | 375 | 26.13% |
+| Test set | 125 | 26.40% |
+
+Setting `shuffle=False` in `make_classification` keeps the five informative features before the three noise features. This makes the feature-selection results easier to interpret.
+
+### Initial Feature Scores
+
+`SelectKBest` with `f_classif` evaluates each feature independently using the training data.
+
+| Feature | ANOVA F-score | Initial Selection |
+| --- | ---: | --- |
+| `informative_1` | 46.896 | Selected |
+| `informative_2` | 45.410 | Selected |
+| `informative_3` | 2.178 | Removed |
+| `informative_4` | 61.024 | Selected |
+| `informative_5` | 28.974 | Selected |
+| `noise_1` | 3.596 | Selected |
+| `noise_2` | 0.004 | Removed |
+| `noise_3` | 0.024 | Removed |
+
+The initial selector uses `k=5` only to inspect feature scores.
+
+Although `informative_3` is a genuinely informative feature, its individual F-score is lower than the score of `noise_1`. This demonstrates that a univariate feature-selection method does not measure interactions between multiple features.
+
+### Feature-Selection Pipeline
+
+The final experiment uses the following pipeline:
+
+```text
+SelectKBest
+    ↓
+StandardScaler
+    ↓
+K-Nearest Neighbors
+```
+
+Feature selection is placed inside the pipeline so that each cross-validation fold learns its selection rules from only its own training subset.
+
+This prevents information from the validation fold from leaking into feature selection.
+
+The KNN model uses the best hyperparameters found during Day 8:
+
+```text
+n_neighbors=3
+weights=uniform
+p=2
+```
+
+### Feature Count Search
+
+The number of selected features was evaluated from 1 through 8 using stratified 5-fold cross-validation.
+
+```text
+8 feature-count candidates × 5 folds
+= 40 model fits
+```
+
+The final test set was not used to select the feature count.
+
+### Cross-Validation Results
+
+| Selected Features | Mean CV F1 | Standard Deviation |
+| ---: | ---: | ---: |
+| 1 | 0.516 | 0.099 |
+| 2 | 0.615 | 0.069 |
+| 3 | 0.796 | 0.056 |
+| 4 | 0.837 | 0.030 |
+| 5 | 0.781 | 0.047 |
+| 6 | **0.871** | 0.038 |
+| 7 | 0.841 | 0.012 |
+| 8 | 0.806 | 0.048 |
+
+The best result was obtained with six selected features:
+
+```text
+Best number of features: 6
+Best mean CV F1-score: 0.871 ± 0.038
+```
+
+Compared with using all eight features, selecting six features improved the mean cross-validation F1-score from `0.806` to `0.871`.
+
+### Selected Features
+
+The best pipeline selected the following features:
+
+```text
+informative_1
+informative_2
+informative_3
+informative_4
+informative_5
+noise_1
+```
+
+All five informative features were included. The selector also included `noise_1` because it showed a stronger individual statistical relationship with the target than the other noise features.
+
+This does not mean that `noise_1` is genuinely important. Random features can sometimes show an accidental relationship with the target, especially when the dataset is limited.
+
+### Final Holdout Test Result
+
+| Metric | Score |
+| --- | ---: |
+| Accuracy | 0.912 |
+| Precision | 0.824 |
+| Recall | 0.848 |
+| F1-score | 0.836 |
+
+The final test F1-score was `0.035` lower than the best mean cross-validation score:
+
+```text
+Best mean CV F1: 0.871
+Final test F1:    0.836
+```
+
+This relatively small difference indicates that the selected pipeline generalized reasonably well to the independent test set.
+
+### Key Lesson
+
+Feature selection is part of model training and must be performed inside the cross-validation pipeline.
+
+A high individual feature score does not guarantee that a feature is genuinely important, and a low individual score does not guarantee that the feature is useless when combined with other features.
+
+The number of selected features should therefore be determined using cross-validation rather than chosen only from individual feature scores or final test performance.
+
+### Source Code
+
+- [`feature_selection.py`](examples/09_Feature_Selection/feature_selection.py)
+
+### Next Step
+
+**Day 10 — Feature Importance and Model Explainability**
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
