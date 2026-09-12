@@ -946,6 +946,159 @@ The number of selected features should therefore be determined using cross-valid
 
 **Day 10 — Feature Importance and Model Explainability**
 
+## Day 10 — Feature Importance and Model Explainability
+
+Day 10 explores how to understand which input features influence a trained machine learning model.
+
+A Random Forest classifier was trained using the same dataset structure as Day 9. Two global feature-importance methods were then compared:
+
+- Random Forest built-in feature importance
+- Permutation importance measured with the test F1-score
+
+The goal is not only to measure model performance, but also to understand which features the model depends on when making predictions.
+
+### Dataset
+
+The synthetic binary-classification dataset contains five informative features and three noise features.
+
+| Item | Value |
+| --- | ---: |
+| Total samples | 500 |
+| Training samples | 375 |
+| Test samples | 125 |
+| Total features | 8 |
+| Informative features | 5 |
+| Noise features | 3 |
+| Training positive ratio | 26.13% |
+| Test positive ratio | 26.40% |
+
+The dataset uses `shuffle=False`, so the first five features are informative and the final three features are noise.
+
+### Random Forest Model
+
+The model uses 200 decision trees and balanced class weights.
+
+```python
+model = RandomForestClassifier(
+    n_estimators=200,
+    class_weight="balanced",
+    random_state=42,
+    n_jobs=-1,
+)
+```
+
+### Run the Example
+
+```bash
+python examples/10_Feature_Importance/feature_importance.py
+```
+
+### Model Performance
+
+| Metric | Score |
+| --- | ---: |
+| Accuracy | 0.912 |
+| Precision | 0.824 |
+| Recall | 0.848 |
+| F1-score | 0.836 |
+
+The model achieved an F1-score of `0.836`. Precision and recall were also reasonably balanced despite the unequal class distribution.
+
+### Random Forest Built-in Feature Importance
+
+Random Forest provides built-in importance values through the `feature_importances_` attribute.
+
+These values measure how much each feature reduced impurity across the decision trees.
+
+| Rank | Feature | Importance |
+| ---: | --- | ---: |
+| 1 | `informative_4` | 0.2437 |
+| 2 | `informative_2` | 0.2305 |
+| 3 | `informative_1` | 0.1489 |
+| 4 | `informative_5` | 0.1305 |
+| 5 | `informative_3` | 0.1102 |
+| 6 | `noise_2` | 0.0475 |
+| 7 | `noise_3` | 0.0444 |
+| 8 | `noise_1` | 0.0443 |
+
+The five informative features received the highest importance values. However, the three noise features also received small positive values because they were occasionally used in tree splits.
+
+### Permutation Importance
+
+Permutation importance measures how much model performance decreases after randomly shuffling one feature.
+
+For this experiment:
+
+- importance was calculated on the test set;
+- the scoring metric was F1-score;
+- each feature was shuffled 30 times;
+- the mean and standard deviation were recorded.
+
+| Rank | Feature | Mean Importance | Standard Deviation |
+| ---: | --- | ---: | ---: |
+| 1 | `informative_4` | 0.2629 | 0.0460 |
+| 2 | `informative_2` | 0.1830 | 0.0323 |
+| 3 | `informative_5` | 0.0977 | 0.0350 |
+| 4 | `informative_3` | 0.0814 | 0.0291 |
+| 5 | `informative_1` | 0.0505 | 0.0274 |
+| 6 | `noise_1` | -0.0024 | 0.0067 |
+| 7 | `noise_2` | -0.0097 | 0.0136 |
+| 8 | `noise_3` | -0.0117 | 0.0152 |
+
+The five informative features produced positive importance values. Shuffling these features reduced the test F1-score.
+
+The noise features produced values close to or below zero, indicating that the model did not gain useful predictive information from them on the test set.
+
+### Comparison of the Two Methods
+
+| Method | Measurement | Main Advantage | Limitation |
+| --- | --- | --- | --- |
+| Built-in importance | Reduction in tree impurity | Fast and directly available | Can assign importance to noisy features |
+| Permutation importance | Score reduction after shuffling | Model-agnostic and evaluated on unseen data | Requires more computation and can be affected by correlated features |
+
+Both methods selected `informative_4` as the most important feature.
+
+However, the built-in method assigned small positive importance values to all noise features, while permutation importance showed that the noise features did not improve test performance.
+
+### Feature Importance Visualization
+
+![Day 10 feature importance comparison](outputs/day10_feature_importance.png)
+
+The chart compares built-in importance and permutation importance for the eight input features.
+
+The negative permutation values for the noise features do not automatically prove that those features are harmful. Small negative values can result from test-set variation and random shuffling.
+
+### Interpretation Guidelines
+
+Feature importance must be interpreted carefully:
+
+- High importance means that the model depends on a feature.
+- High importance does not prove that the feature causes the outcome.
+- Low importance does not always mean that a feature is useless.
+- Correlated features can divide or hide each other's importance.
+- Importance results can change with the model, dataset, and evaluation metric.
+- Validation or test data should be used for permutation importance.
+
+### Key Lesson
+
+Feature selection and feature importance answer different questions.
+
+- Feature selection asks which features should be included before or during training.
+- Feature importance asks which features a trained model used most heavily.
+- Model explainability helps people understand and evaluate model behavior.
+
+Using multiple explanation methods provides more reliable evidence than relying on one importance value alone.
+
+### Source Code
+
+- [`feature_importance.py`](examples/10_Feature_Importance/feature_importance.py)
+- [Feature importance comparison](outputs/day10_feature_importance.png)
+
+### Next Step
+
+**Day 11 — Handling Imbalanced Data**
+
+
 ## Progress
 
 - [x] Day 1 - AI Fundamentals and First Machine Learning Model
@@ -956,7 +1109,9 @@ The number of selected features should therefore be determined using cross-valid
 - [x] Day 6 - Comparing Machine Learning Models
 - [x] Day 7 - Cross-Validation and Reliable Model Evaluation
 - [x] Day 8 - Hyperparameter Tuning with GridSearchCV
-- [ ] Day 9 - Feature Selection and Model Interpretation
+- [x] Day 9 - Feature Selection and Model Interpretation
+- [x] Day 10 - Feature Importance and Model Explainability
+- [ ] Day 11 - Handling Imbalanced Data
 
 ---
 
