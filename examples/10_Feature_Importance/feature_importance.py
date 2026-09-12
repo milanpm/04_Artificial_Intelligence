@@ -150,7 +150,7 @@ def main():
             f"{mean_importance:.4f} +/- {std_importance:.4f}"
         )
 
-        output_path = save_importance_chart(
+    output_path = save_importance_chart(
         feature_names=FEATURE_NAMES,
         built_in_values=model.feature_importances_,
         permutation_values=permutation_result.importances_mean,
@@ -179,6 +179,7 @@ def main():
         "A high importance value indicates model dependence, "
         "not a causal relationship."
     )
+
 
 def save_importance_chart(
     feature_names,
@@ -273,6 +274,7 @@ def save_importance_chart(
     plt.close(figure)
 
     return output_path
+
 
 if __name__ == "__main__":
     main()

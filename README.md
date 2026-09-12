@@ -1098,6 +1098,252 @@ Using multiple explanation methods provides more reliable evidence than relying 
 
 **Day 11 — Handling Imbalanced Data**
 
+## Day 11 — Handling Imbalanced Data
+
+Day 11 explores how class imbalance affects classification models and how it can be handled during model training.
+
+An imbalanced dataset contains significantly more samples from one class than another. In this experiment, approximately 89% of the samples belong to Class 0, while only 11% belong to Class 1.
+
+Three Logistic Regression approaches were compared:
+
+- baseline learning without imbalance handling;
+- class weighting using `class_weight="balanced"`;
+- random oversampling using `RandomOverSampler`.
+
+The goal is to improve detection of the minority class while understanding the trade-off between precision, recall, and overall accuracy.
+
+### Dataset
+
+A synthetic binary-classification dataset was created with a strong class imbalance.
+
+| Item | Value |
+| --- | ---: |
+| Total samples | 1,000 |
+| Training samples | 750 |
+| Test samples | 250 |
+| Total features | 8 |
+| Training Class 0 | 670 |
+| Training Class 1 | 80 |
+| Test Class 0 | 223 |
+| Test Class 1 | 27 |
+
+The original training distribution was:
+
+| Class | Samples | Ratio |
+| ---: | ---: | ---: |
+| Class 0 | 670 | 89.33% |
+| Class 1 | 80 | 10.67% |
+
+The test set preserved approximately the same class distribution through stratified splitting.
+
+### Why Accuracy Can Be Misleading
+
+A model can achieve high accuracy on imbalanced data by predicting the majority class most of the time.
+
+For example, the baseline model achieved a test accuracy of `0.892`. However, it identified only 7 of the 27 minority-class samples.
+
+```text
+Baseline Confusion Matrix
+
+[[216   7]
+ [ 20   7]]
+```
+
+Its minority-class recall was therefore only:
+
+```text
+Recall = 7 / (7 + 20) = 0.259
+```
+
+The high accuracy concealed the fact that approximately 74% of the minority-class samples were missed.
+
+### Baseline Model
+
+The baseline model used feature scaling and Logistic Regression without any imbalance-handling method.
+
+```python
+baseline_model = Pipeline(
+    steps=[
+        ("scaler", StandardScaler()),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42,
+            ),
+        ),
+    ]
+)
+```
+
+This model provides a reference point for measuring the effect of class weighting and oversampling.
+
+### Class Weighting
+
+Class weighting increases the penalty for misclassifying samples from the minority class.
+
+```python
+LogisticRegression(
+    class_weight="balanced",
+    max_iter=1000,
+    random_state=42,
+)
+```
+
+The balanced class weights are calculated from the class frequencies. This changes the model's learning objective without creating or duplicating samples.
+
+### Random Oversampling
+
+Random oversampling balances the training data by duplicating minority-class samples.
+
+| Distribution | Class 0 | Class 1 |
+| --- | ---: | ---: |
+| Before oversampling | 670 | 80 |
+| After oversampling | 670 | 670 |
+
+Random oversampling does not create new synthetic observations. It randomly duplicates existing minority-class samples until the classes are balanced.
+
+### Preventing Data Leakage
+
+Oversampling must be applied only to training data.
+
+Applying it before splitting the dataset or before cross-validation would allow information from validation or test samples to influence training. This would cause data leakage and produce overly optimistic evaluation results.
+
+An `imblearn` pipeline ensures that oversampling is performed independently inside each training fold:
+
+```python
+oversampling_model = ImbPipeline(
+    steps=[
+        ("scaler", StandardScaler()),
+        (
+            "sampler",
+            RandomOverSampler(
+                random_state=42,
+            ),
+        ),
+        (
+            "model",
+            LogisticRegression(
+                max_iter=1000,
+                random_state=42,
+            ),
+        ),
+    ]
+)
+```
+
+The validation and test data retain their original class distributions.
+
+### Run the Example
+
+```bash
+python examples/11_Imbalanced_Data/imbalanced_data.py
+```
+
+### Cross-Validation Results
+
+The three methods were evaluated using 5-fold stratified cross-validation.
+
+| Method | Accuracy | Precision | Recall | F1-score |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline | 0.905 | 0.676 | 0.250 | 0.344 |
+| Class Weight | 0.795 | 0.320 | 0.812 | 0.459 |
+| Random Oversampling | 0.799 | 0.325 | 0.812 | **0.464** |
+
+The baseline model achieved the highest accuracy and precision, but its minority-class recall was only `0.250`.
+
+Class weighting and random oversampling both increased recall to `0.812`. Random oversampling achieved the highest mean cross-validation F1-score, although its advantage over class weighting was only `0.005`.
+
+This small difference does not establish that random oversampling is universally superior. The two imbalance-handling methods produced very similar cross-validation performance.
+
+### Independent Test Results
+
+| Method | Accuracy | Precision | Recall | F1-score |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline | **0.892** | **0.500** | 0.259 | 0.341 |
+| Class Weight | 0.800 | 0.323 | **0.778** | **0.457** |
+| Random Oversampling | 0.796 | 0.318 | **0.778** | 0.452 |
+
+Class weighting produced the highest test F1-score, while class weighting and random oversampling produced the same test recall.
+
+### Confusion Matrix Comparison
+
+The baseline model produced:
+
+```text
+[[216   7]
+ [ 20   7]]
+```
+
+The class-weighted model produced:
+
+```text
+[[179  44]
+ [  6  21]]
+```
+
+The random-oversampling model produced:
+
+```text
+[[178  45]
+ [  6  21]]
+```
+
+Both imbalance-handling methods reduced false negatives from 20 to 6 and increased true positives from 7 to 21.
+
+However, this improvement also increased false positives:
+
+| Method | False positives | False negatives |
+| --- | ---: | ---: |
+| Baseline | 7 | 20 |
+| Class Weight | 44 | 6 |
+| Random Oversampling | 45 | 6 |
+
+This demonstrates the central trade-off in imbalanced classification:
+
+- improving minority-class recall can increase false positives;
+- maximizing accuracy can cause the model to ignore minority-class samples;
+- the appropriate balance depends on the real-world cost of each error type.
+
+In a medical screening system, a false negative may be more harmful than a false positive. In other applications, excessive false positives may create significant cost or workload.
+
+### Comparison of the Methods
+
+| Method | Main mechanism | Advantage | Limitation |
+| --- | --- | --- | --- |
+| Baseline | No imbalance handling | Simple and preserves the original data | Can ignore the minority class |
+| Class Weight | Increases minority-class error penalty | Does not duplicate data | Can reduce precision and accuracy |
+| Random Oversampling | Duplicates minority-class samples | Simple and improves minority-class exposure | Can increase overfitting risk |
+
+For this dataset, class weighting is a practical first choice because it achieved the highest test F1-score without duplicating training samples.
+
+### Interpretation Guidelines
+
+Imbalanced classification results must be interpreted carefully:
+
+- Accuracy alone is insufficient for evaluating minority-class performance.
+- Precision and recall describe different error trade-offs.
+- F1-score balances precision and recall but does not include true negatives.
+- Oversampling must be applied only to training data.
+- Cross-validation should preserve the class ratio through stratification.
+- A resampling method that works well on one dataset may not work well on another.
+- The best method depends on the cost of false positives and false negatives.
+
+### Key Lesson
+
+Class imbalance can make a model appear accurate even when it fails to detect most minority-class samples.
+
+Class weighting and random oversampling substantially improved minority-class recall in this experiment, but they also increased false positives and reduced overall accuracy.
+
+The correct objective is therefore not to maximize accuracy blindly. It is to select an evaluation metric and imbalance-handling method that reflect the real cost of prediction errors.
+
+### Source Code
+
+- [`imbalanced_data.py`](examples/11_Imbalanced_Data/imbalanced_data.py)
+
+### Next Step
+
+**Day 12 — Decision Threshold Tuning and Precision-Recall Trade-offs**
 
 ## Progress
 
@@ -1111,7 +1357,8 @@ Using multiple explanation methods provides more reliable evidence than relying 
 - [x] Day 8 - Hyperparameter Tuning with GridSearchCV
 - [x] Day 9 - Feature Selection and Model Interpretation
 - [x] Day 10 - Feature Importance and Model Explainability
-- [ ] Day 11 - Handling Imbalanced Data
+- [x] Day 11 - Handling Imbalanced Data
+- [ ] Day 12 - Decision Threshold Tuning and Precision-Recall Trade-offs
 
 ---
 
